@@ -1,0 +1,9 @@
+full block       :█
+right half block :▐
+left half block  :▌
+horizontal double border   :═
+vertical double border     :║
+top-left double corner     :╔
+top-right double corner    :╗
+bottom-left double corner  :╚
+bottom-right double corner :╝
