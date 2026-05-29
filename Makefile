@@ -1,87 +1,95 @@
-CC = clang
-CFLAGS = -std=c11
-OPT_CFLAGS = -O2
-DEBUG_CFLAGS = -g
+# --- Toolchain ---
+COMPILE = gcc -c
+LINK    = gcc
+DEPEND  = gcc -MM -MG -MF
+CFLAGS  = -Wall -Wextra -Isrc -Isrc/engine -Isrc/display -Isrc/utils -Iunity/src
 
-# Define the names of the executables
-DEFAULT_TARGET = a.out
-DEBUG_TARGET = d.out
-RELEASE_TARGET = dfish
+# --- Directories ---
+PATHB = bin/
+PATHO = $(PATHB)objs/
+PATHD = $(PATHB)depends/
+PATHR = $(PATHB)results/
 
-SOURCES = $(wildcard src/engine/*.c) $(wildcard src/display/*.c) $(wildcard src/utils/*.c) src/main.c
+BUILD_PATHS = $(PATHB) $(PATHO) $(PATHD) $(PATHR)
 
-# Define distinct object file names for each build type
-OBJECT_DIR = bin
-OBJECTS_DEFAULT = $(addprefix $(OBJECT_DIR)/default_,$(subst /,_,$(SOURCES:.c=.o)))
-OBJECTS_DEBUG = $(addprefix $(OBJECT_DIR)/debug_,$(subst /,_,$(SOURCES:.c=.o)))
-OBJECTS_RELEASE = $(addprefix $(OBJECT_DIR)/release_,$(subst /,_,$(SOURCES:.c=.o)))
+# --- Source Files ---
+SRCS = $(shell find src -name '*.c')
+LIB_SRCS = $(filter-out src/main.c, $(SRCS))
+TEST_SRCS = $(wildcard test/*.c test/**/*.c)
+UNITY_SRC = unity/src/unity.c
 
-.PHONY: all full debug release clean run test
+# --- Object & Dependency Mapping (Tree Preserved) ---
+# Maps src/engine/board.c -> bin/objs/src/engine/board.o
+NORMAL_OBJS = $(patsubst %.c, $(PATHO)%.o, $(SRCS))
+TEST_OBJS   = $(patsubst %.c, $(PATHO)%.o, $(TEST_SRCS) $(LIB_SRCS) $(UNITY_SRC))
+DEPS        = $(patsubst %.c, $(PATHD)%.d, $(SRCS))
+RESULTS     = $(patsubst %.c, $(PATHR)%.txt, $(TEST_SRCS))
 
-# --- Main Build Targets ---
+# --- Target Binaries ---
+NORMAL_BIN  = a.out
+DEBUG_BIN   = d.out
+RELEASE_BIN = dfish
 
-# 'all' target builds the default (non-optimized) and debug versions
-all: $(DEFAULT_TARGET) $(DEBUG_TARGET)
+.PHONY: all full normal debug release test clean
+.PRECIOUS: $(PATHB)test_%.out $(PATHD)%.d $(PATHO)%.o $(PATHR)%.txt
 
-# 'full' target builds the non-optimized, debug, and release(optimized) versions
-full: $(DEFAULT_TARGET) $(DEBUG_TARGET) $(RELEASE_TARGET)
+# Default
+all: normal debug
+full: normal debug release
 
-# Rule for the default build, using only CFLAGS
-$(DEFAULT_TARGET): $(OBJECTS_DEFAULT)
-	@echo "Linking $(DEFAULT_TARGET) (default)..."
-	$(CC) $(CFLAGS) $(OBJECTS_DEFAULT) -o $@
+# --- Build Rules ---
 
-# Rule for the debug build, using CFLAGS + DEBUG_CFLAGS
-$(DEBUG_TARGET): $(OBJECTS_DEBUG)
-	@echo "Linking $(DEBUG_TARGET) (debug)..."
-	$(CC) $(CFLAGS) $(DEBUG_CFLAGS) $(OBJECTS_DEBUG) -o $@
+normal: $(NORMAL_BIN)
+$(NORMAL_BIN): $(NORMAL_OBJS)
+	$(LINK) -o $@ $(NORMAL_OBJS)
 
-# Rule for the release build, using CFLAGS + OPT_CFLAGS
-$(RELEASE_TARGET): $(OBJECTS_RELEASE)
-	@echo "Linking $(RELEASE_TARGET) (optimized release)..."
-	$(CC) $(CFLAGS) $(OPT_CFLAGS) $(OBJECTS_RELEASE) -o $@
+debug: CFLAGS += -g -O0 -DDEBUG
+debug: $(DEBUG_BIN)
+$(DEBUG_BIN): $(NORMAL_OBJS)
+	$(LINK) -o $@ $(NORMAL_OBJS)
 
-# --- Compilation Rules for Object Files ---
+release: CFLAGS += -O2 -DNDEBUG
+release: $(RELEASE_BIN)
+$(RELEASE_BIN): $(NORMAL_OBJS)
+	$(LINK) -o $@ $(NORMAL_OBJS)
 
-.SECONDEXPANSION:
+# --- Testing Rules ---
 
-# Rule to compile source files into default object files (no optimization)
-$(OBJECT_DIR)/default_%.o: $$(subst _,/,%.c)
-	@mkdir -p $(OBJECT_DIR)
-	@echo "Compiling $< for default build..."
-	$(CC) $(CFLAGS) -c $< -o $@
+test: $(RESULTS)
+	@echo "\n-----------------------"
+	@echo "IGNORES:"
+	@echo "-----------------------"
+	@grep -s IGNORE $(PATHR)*.txt || true
+	@echo "-----------------------"
+	@echo "FAILURES:"
+	@echo "-----------------------"
+	@grep -s FAIL $(PATHR)*.txt || true
+	@echo "\nDONE"
 
-# Rule to compile source files into debug object files
-$(OBJECT_DIR)/debug_%.o: $$(subst _,/,%.c)
-	@mkdir -p $(OBJECT_DIR)
-	@echo "Compiling $< for debug build..."
-	$(CC) $(CFLAGS) $(DEBUG_CFLAGS) -c $< -o $@
+# Run the test executable and pipe output to a results text file
+$(PATHR)%.txt: $(PATHB)%.out
+	@mkdir -p $(dir $@)
+	-./$< > $@ 2>&1
 
-# Rule to compile source files into release object files (with optimization)
-$(OBJECT_DIR)/release_%.o: $$(subst _,/,%.c)
-	@mkdir -p $(OBJECT_DIR)
-	@echo "Compiling $< for optimized release build..."
-	$(CC) $(CFLAGS) $(OPT_CFLAGS) -c $< -o $@
+# Link the test executable
+$(PATHB)%.out: $(PATHO)%.o $(TEST_OBJS)
+	@mkdir -p $(dir $@)
+	$(LINK) -o $@ $^
 
-# --- Utility Targets ---
+# --- Compiling Object Files ---
+$(PATHO)%.o: %.c
+	@mkdir -p $(dir $@)
+	$(COMPILE) $(CFLAGS) $< -o $@
 
-# 'debug' target explicitly builds only the debug version
-debug: $(DEBUG_TARGET)
+# --- Dependency Tracking ---
+$(PATHD)%.d: %.c
+	@mkdir -p $(dir $@)
+	$(DEPEND) $@ $<
 
-# 'release' target explicitly builds only the optimized release version
-release: $(RELEASE_TARGET)
+# Include generated dependencies if they exist
+-include $(DEPS)
 
-# 'run' target builds and executes the debug version
-run: $(DEBUG_TARGET)
-	@echo "Running $(DEBUG_TARGET)..."
-	./$(DEBUG_TARGET)
-
-test: all
-	rm -rf test-result/
-	./test.sh
-
-# 'clean' target removes all generated files and the object directory
+# --- Cleanup ---
 clean:
-	@echo "Cleaning up..."
-	rm -f $(OBJECT_DIR)/*.o $(DEFAULT_TARGET) $(DEBUG_TARGET) $(RELEASE_TARGET)
-	rmdir $(OBJECT_DIR) 2>/dev/null || true # Remove directory if empty, suppress error if not
+	rm -f $(NORMAL_BIN) $(DEBUG_BIN) $(RELEASE_BIN)
+	rm -rf $(PATHB)
