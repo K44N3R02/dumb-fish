@@ -1,6 +1,6 @@
-#include "display/colored.h"
-#include "display/board.h"
-#include "utils/fen.h"
+#include "display_colored.h"
+#include "display_board.h"
+#include "utils_fen.h"
 
 int main(void)
 {

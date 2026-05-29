@@ -1,7 +1,7 @@
 #ifndef DF_ENGINE_PIECES_H
 #define DF_ENGINE_PIECES_H
 
-#include "../common.h"
+#include "common.h"
 
 #define PIECE_NONE ((uint8_t)0b00000000)
 #define PIECE_PAWN ((uint8_t)0b00000001)

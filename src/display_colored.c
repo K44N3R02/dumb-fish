@@ -1,4 +1,4 @@
-#include "colored.h"
+#include "display_colored.h"
 
 /**
  * set_foreground() - override foreground color of terminal

@@ -1,5 +1,4 @@
-#include "board.h"
-#include "colored.h"
+#include "display_board.h"
 #include <stdint.h>
 
 /**

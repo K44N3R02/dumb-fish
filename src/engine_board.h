@@ -1,8 +1,8 @@
 #ifndef DF_ENGINE_BOARD_H
 #define DF_ENGINE_BOARD_H
 
-#include "../common.h"
-#include "pieces.h"
+#include "common.h"
+#include "engine_pieces.h"
 
 /**
  * struct board - internal representation of a chess board for searches

@@ -1,4 +1,4 @@
-#include "fen.h"
+#include "utils_fen.h"
 
 /** from_fen() - construct a board from a FEN string
  * @fen: pointer to first character of FEN string
@@ -91,7 +91,7 @@ struct board from_fen(const char *fen)
 		cursor += 2;
 	} else {
 		board.en_passant_square =
-			8 * (8 - cursor[1] + '1') + (cursor[0] - 'a');
+			8 * (7 - cursor[1] + '1') + (cursor[0] - 'a');
 		cursor += 3;
 	}
 
