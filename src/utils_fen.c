@@ -1,4 +1,7 @@
+#include "engine_board.h"
+#include "engine_pieces.h"
 #include "utils_fen.h"
+#include <string.h>
 
 /** from_fen() - construct a board from a FEN string
  * @fen: pointer to first character of FEN string

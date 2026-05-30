@@ -1,4 +1,5 @@
 #include "unity.h"
+#include "../src/engine_pieces.h"
 #include "../src/utils_fen.h"
 
 void setUp(void)

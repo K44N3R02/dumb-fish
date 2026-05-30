@@ -1,5 +1,9 @@
 #include "display_board.h"
+#include "display_colored.h"
+#include "engine_board.h"
+#include "engine_pieces.h"
 #include <stdint.h>
+#include <stdio.h>
 
 /**
  * piece_to_char() - get character representation of piece

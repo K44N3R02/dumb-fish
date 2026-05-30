@@ -1,10 +1,7 @@
 #ifndef DF_DISPLAY_COLORED_H
 #define DF_DISPLAY_COLORED_H
 
-#include <stdarg.h>
-#include <stdio.h>
-
-#include "common.h"
+#include <stdint.h>
 
 /**
  * enum display_color - encode ANSI escape colors
