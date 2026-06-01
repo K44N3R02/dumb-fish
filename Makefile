@@ -23,7 +23,9 @@ TEST_SRCS = $(wildcard test/*.c)
 # --- Object & Dependency Mapping ---
 # Convert src/engine/board.c -> bin/objs/board.o (flattened for simplicity)
 NORMAL_OBJS = $(addprefix $(PATHO), $(notdir $(SRCS:.c=.o)))
-TEST_OBJS   = $(addprefix $(PATHO), $(notdir $(TEST_SRCS:.c=.o))) $(addprefix $(PATHO), $(notdir $(LIB_SRCS:.c=.o))) $(PATHO)unity.o
+# Core objects to link against tests (your engine code, minus main.c)
+LIB_OBJS    = $(addprefix $(PATHO), $(notdir $(LIB_SRCS:.c=.o)))
+UNITY_OBJ   = $(PATHO)unity.o
 
 # Convert test files to result files: test/test_board.c -> bin/results/test_board.txt
 RESULTS = $(patsubst test/%.c, $(PATHR)%.txt, $(TEST_SRCS))
@@ -74,7 +76,7 @@ $(PATHR)%.txt: $(PATHB)%.out
 	-./$< > $@ 2>&1
 
 # Link the test executable
-$(PATHB)%.out: $(PATHO)%.o $(TEST_OBJS)
+$(PATHB)%.out: $(PATHO)%.o $(LIB_OBJS) $(UNITY_OBJ)
 	$(LINK) -o $@ $^
 
 # --- Compiling Object Files (VPATH helps Make find sources in subdirectories) ---
