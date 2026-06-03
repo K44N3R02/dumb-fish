@@ -2,6 +2,7 @@
 #define DF_ENGINE_MOVE_H
 
 #include "engine_board.h"
+#include "utils_list.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -28,11 +29,15 @@ struct move {
 };
 
 struct move new_move(uint8_t origin_index, uint8_t target_index,
-		     const struct board board);
+		     const struct board *board);
 struct move new_promotion(uint8_t origin_index, uint8_t target_index,
-			  uint8_t promotion, const struct board board);
+			  uint8_t promotion, const struct board *board);
 
 void make_move(struct board *board, struct move move);
 void unmake_move(struct board *board, struct move move);
+
+DECLARE_LIST(move, struct move);
+
+bool get_legal_moves(const struct board *board, struct move_list *moves);
 
 #endif // DF_ENGINE_MOVE_H

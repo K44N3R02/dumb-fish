@@ -28,7 +28,7 @@ void test_make_move_position1(void)
 		       "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_C7, SQ_C6, board_before);
+	struct move move = new_move(SQ_C7, SQ_C6, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
@@ -45,7 +45,7 @@ void test_make_move_position2(void)
 		       "rnbqkb1r/pppppppp/5n2/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 1 1";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_G8, SQ_F6, board_before);
+	struct move move = new_move(SQ_G8, SQ_F6, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
@@ -60,7 +60,7 @@ void test_make_move_position3(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 	struct move move = new_promotion(
-		SQ_C7, SQ_C8, PIECE_WHITE | PIECE_QUEEN, board_before);
+		SQ_C7, SQ_C8, PIECE_WHITE | PIECE_QUEEN, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&board_before, &board_after,
@@ -77,7 +77,7 @@ void test_make_move_position4(void)
 		       "rnbq1rk1/ppp1ppbp/3p1np1/8/3PP3/2N2N2/PPP1BPPP/R1BQK2R w KQ - 4 6";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_E8, SQ_G8, board_before);
+	struct move move = new_move(SQ_E8, SQ_G8, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
@@ -94,7 +94,7 @@ void test_make_move_position5(void)
 		       "rn1q1rk1/pbp1ppbp/1p1p1np1/8/3PP3/2N1BN2/PPPQBPPP/2KR3R b - - 3 8";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_E1, SQ_C1, board_before);
+	struct move move = new_move(SQ_E1, SQ_C1, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
@@ -111,7 +111,7 @@ void test_make_move_position6(void)
 		       "rnbqkbnr/ppp2ppp/8/3pp3/P6P/7R/1PPPPPP1/RNBQKBN1 b Qkq - 1 3";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_H1, SQ_H3, board_before);
+	struct move move = new_move(SQ_H1, SQ_H3, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
@@ -128,7 +128,7 @@ void test_make_move_position7(void)
 		       "rnbqkb1Q/ppppnp1p/6p1/8/4P3/8/PPPP1PPP/RNB1KBNR b KQq - 0 4";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_E5, SQ_H8, board_before);
+	struct move move = new_move(SQ_E5, SQ_H8, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
@@ -145,7 +145,7 @@ void test_make_move_position8(void)
 		       "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPPKPPP/RNBQ1BNR b kq - 1 2";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_E1, SQ_E2, board_before);
+	struct move move = new_move(SQ_E1, SQ_E2, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
@@ -164,7 +164,7 @@ void test_make_move_position9(void)
 		       "rnbq1bnr/ppppkppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR b - - 3 3";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_E2, SQ_E1, board_before);
+	struct move move = new_move(SQ_E2, SQ_E1, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
@@ -181,7 +181,7 @@ void test_make_move_position10(void)
 		       "rnbqkb1r/ppp2ppp/5n2/3pp3/P6P/8/1PPPPPP1/RNBQKBNR b Kkq - 3 4";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_A3, SQ_A1, board_before);
+	struct move move = new_move(SQ_A3, SQ_A1, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
@@ -195,7 +195,7 @@ void test_make_move_position11(void)
 		   *next_fen = "8/5k2/2R5/1r5P/5PK1/8/8/8 w - - 10 6";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_G7, SQ_F7, board_before);
+	struct move move = new_move(SQ_G7, SQ_F7, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
@@ -209,7 +209,7 @@ void test_make_move_position12(void)
 		   *next_fen = "8/5k2/2R5/1r3P1P/6K1/8/8/8 b - - 0 6";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_F4, SQ_F5, board_before);
+	struct move move = new_move(SQ_F4, SQ_F5, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
@@ -223,7 +223,7 @@ void test_make_move_position13(void)
 		   *next_fen = "8/5k2/1R6/5r1P/6K1/8/8/8 w - - 0 10";
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
-	struct move move = new_move(SQ_A5, SQ_F5, board_before);
+	struct move move = new_move(SQ_A5, SQ_F5, &board_before);
 
 	unmake_move(&board_after, move);
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(

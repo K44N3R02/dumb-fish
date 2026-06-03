@@ -22,7 +22,7 @@ void test_make_move_position1(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_E2, SQ_E4, board_before));
+	make_move(&board_before, new_move(SQ_E2, SQ_E4, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
 		&board_after, &board_before, sizeof(struct board),
 		"double pawn move must enable en passant");
@@ -38,7 +38,7 @@ void test_make_move_position2(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_G8, SQ_F6, board_before));
+	make_move(&board_before, new_move(SQ_G8, SQ_F6, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
 		&board_after, &board_before, sizeof(struct board),
 		"non-pawn move must disable en passant");
@@ -53,7 +53,7 @@ void test_make_move_position3(void)
 
 	make_move(&board_before,
 		  new_promotion(SQ_C7, SQ_C8, PIECE_WHITE | PIECE_QUEEN,
-				board_before));
+				&board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
 		&board_after, &board_before, sizeof(struct board),
 		"if promotion is not none, piece should transform to it");
@@ -69,7 +69,7 @@ void test_make_move_position4(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_E8, SQ_G8, board_before));
+	make_move(&board_before, new_move(SQ_E8, SQ_G8, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&board_after, &board_before,
 					 sizeof(struct board),
 					 "short castling must move rook too");
@@ -85,7 +85,7 @@ void test_make_move_position5(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_E1, SQ_C1, board_before));
+	make_move(&board_before, new_move(SQ_E1, SQ_C1, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&board_after, &board_before,
 					 sizeof(struct board),
 					 "long castling should move the rook");
@@ -101,7 +101,7 @@ void test_make_move_position6(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_H1, SQ_H3, board_before));
+	make_move(&board_before, new_move(SQ_H1, SQ_H3, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
 		&board_after, &board_before, sizeof(struct board),
 		"moving rook should remove one castling right");
@@ -117,7 +117,7 @@ void test_make_move_position7(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_E5, SQ_H8, board_before));
+	make_move(&board_before, new_move(SQ_E5, SQ_H8, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
 		&board_after, &board_before, sizeof(struct board),
 		"capturing a rook should remove a castling right");
@@ -133,7 +133,7 @@ void test_make_move_position8(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_E1, SQ_E2, board_before));
+	make_move(&board_before, new_move(SQ_E1, SQ_E2, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
 		&board_after, &board_before, sizeof(struct board),
 		"moving king should remove all castling rights");
@@ -149,7 +149,7 @@ void test_make_move_position9(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_E2, SQ_E1, board_before));
+	make_move(&board_before, new_move(SQ_E2, SQ_E1, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
 		&board_after, &board_before, sizeof(struct board),
 		"castling should be disallowed even after king returns");
@@ -165,7 +165,7 @@ void test_make_move_position10(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_A3, SQ_A1, board_before));
+	make_move(&board_before, new_move(SQ_A3, SQ_A1, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
 		&board_after, &board_before, sizeof(struct board),
 		"castling should be disallowed even after rook returns back");
@@ -178,7 +178,7 @@ void test_make_move_position11(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_G7, SQ_F7, board_before));
+	make_move(&board_before, new_move(SQ_G7, SQ_F7, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
 		&board_after, &board_before, sizeof(struct board),
 		"non-capture and non-pawn move must increment half-turn counter");
@@ -191,7 +191,7 @@ void test_make_move_position12(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_F4, SQ_F5, board_before));
+	make_move(&board_before, new_move(SQ_F4, SQ_F5, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
 		&board_after, &board_before, sizeof(struct board),
 		"pawn move must reset half-turn counter");
@@ -204,7 +204,7 @@ void test_make_move_position13(void)
 	struct board board_before = from_fen(start_fen),
 		     board_after = from_fen(next_fen);
 
-	make_move(&board_before, new_move(SQ_A5, SQ_F5, board_before));
+	make_move(&board_before, new_move(SQ_A5, SQ_F5, &board_before));
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(
 		&board_after, &board_before, sizeof(struct board),
 		"capture must reset half-turn counter");

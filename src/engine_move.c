@@ -1,6 +1,7 @@
 #include "engine_board.h"
 #include "engine_move.h"
 #include "engine_pieces.h"
+#include "utils_list.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -20,16 +21,16 @@
  * Returns: a new &struct move from @origin_index to @target_index
  */
 struct move new_move(uint8_t origin_index, uint8_t target_index,
-		     struct board board)
+		     const struct board *board)
 {
 	struct move move;
 	move.origin_index = origin_index;
 	move.target_index = target_index;
 	move.promote_to = PIECE_NONE;
-	move.prev_captured_piece = board.grid[move.target_index];
-	move.prev_castling = board.castling_rights;
-	move.prev_en_passant = board.en_passant_square;
-	move.prev_half_turn = board.half_turn_count;
+	move.prev_captured_piece = board->grid[move.target_index];
+	move.prev_castling = board->castling_rights;
+	move.prev_en_passant = board->en_passant_square;
+	move.prev_half_turn = board->half_turn_count;
 	return move;
 }
 
@@ -50,16 +51,16 @@ struct move new_move(uint8_t origin_index, uint8_t target_index,
  * Returns: a new &struct move from @origin_index to @target_index
  */
 struct move new_promotion(uint8_t origin_index, uint8_t target_index,
-			  uint8_t promotion, const struct board board)
+			  uint8_t promotion, const struct board *board)
 {
 	struct move move;
 	move.origin_index = origin_index;
 	move.target_index = target_index;
 	move.promote_to = promotion;
-	move.prev_captured_piece = board.grid[move.target_index];
-	move.prev_castling = board.castling_rights;
-	move.prev_en_passant = board.en_passant_square;
-	move.prev_half_turn = board.half_turn_count;
+	move.prev_captured_piece = board->grid[move.target_index];
+	move.prev_castling = board->castling_rights;
+	move.prev_en_passant = board->en_passant_square;
+	move.prev_half_turn = board->half_turn_count;
 	return move;
 }
 
@@ -206,4 +207,107 @@ void unmake_move(struct board *board, struct move move)
 		board->grid[SQ_D8] = PIECE_NONE;
 		board->grid[SQ_A8] = PIECE_BLACK | PIECE_ROOK;
 	}
+}
+
+DEFINE_LIST(move, struct move);
+
+/**
+ * knight_moves() - add pseudo-legal knight moves from a square
+ * @board: pointer to &struct board whose legal moves will be generated
+ * @color: color of player to move
+ * @square: origin square of knight moves
+ * @moves: list where pseudo-legal moves will be added
+ *
+ * NOTE: this function does not consider pins/checks etc.
+ *
+ * Side Effect: this function adds new &struct move's to @moves
+ */
+static void knight_moves(const struct board *board, uint8_t color,
+			 uint8_t square, struct move_list *moves)
+{
+	uint8_t row = GRID_ROW(square);
+	char col = GRID_COL(square);
+
+	if (row <= (8 - 2) && col <= ('h' - 1)) {
+		uint8_t target = square + 2 * OFFSET_UP + OFFSET_RIGHT;
+		if (PIECE_COLOR(board->grid[target]) != color)
+			push_move_list(moves, new_move(square, target, board));
+	}
+	if (row <= (8 - 1) && col <= ('h' - 2)) {
+		uint8_t target = square + OFFSET_UP + 2 * OFFSET_RIGHT;
+		if (PIECE_COLOR(board->grid[target]) != color)
+			push_move_list(moves, new_move(square, target, board));
+	}
+	if (row <= (8 - 2) && col >= ('a' + 1)) {
+		uint8_t target = square + 2 * OFFSET_UP + OFFSET_LEFT;
+		if (PIECE_COLOR(board->grid[target]) != color)
+			push_move_list(moves, new_move(square, target, board));
+	}
+	if (row <= (8 - 1) && col >= ('a' + 2)) {
+		uint8_t target = square + OFFSET_UP + 2 * OFFSET_LEFT;
+		if (PIECE_COLOR(board->grid[target]) != color)
+			push_move_list(moves, new_move(square, target, board));
+	}
+	if (row >= (1 + 2) && col <= ('h' - 1)) {
+		uint8_t target = square + 2 * OFFSET_DOWN + OFFSET_RIGHT;
+		if (PIECE_COLOR(board->grid[target]) != color)
+			push_move_list(moves, new_move(square, target, board));
+	}
+	if (row >= (1 + 1) && col <= ('h' - 2)) {
+		uint8_t target = square + OFFSET_DOWN + 2 * OFFSET_RIGHT;
+		if (PIECE_COLOR(board->grid[target]) != color)
+			push_move_list(moves, new_move(square, target, board));
+	}
+	if (row >= (1 + 2) && col >= ('a' + 1)) {
+		uint8_t target = square + 2 * OFFSET_DOWN + OFFSET_LEFT;
+		if (PIECE_COLOR(board->grid[target]) != color)
+			push_move_list(moves, new_move(square, target, board));
+	}
+	if (row >= (1 + 1) && col >= ('a' + 2)) {
+		uint8_t target = square + OFFSET_DOWN + 2 * OFFSET_LEFT;
+		if (PIECE_COLOR(board->grid[target]) != color)
+			push_move_list(moves, new_move(square, target, board));
+	}
+}
+
+/**
+ * get_legal_moves() - get all possible moves on given board
+ * @board: pointer to the &struct board whose legal moves will be generated
+ * @moves: pointer to a list of moves to return the legal moves
+ *
+ * Side Effect: this function overrides information in @moves
+ * Returns: false if @board.grid is corrupted, true if no problems occurred
+ */
+bool get_legal_moves(const struct board *board, struct move_list *moves)
+{
+	free_move_list(moves);
+	init_move_list(moves);
+
+	uint8_t color_to_move = board->whites_turn ? PIECE_WHITE : PIECE_BLACK;
+
+	for (uint8_t index = 0; index < 64; index++) {
+		uint8_t piece = board->grid[index];
+		if (PIECE_COLOR(piece) != color_to_move)
+			continue;
+
+		switch (PIECE_TYPE(piece)) {
+		case PIECE_PAWN:
+			break;
+		case PIECE_KNIGHT:
+			knight_moves(board, color_to_move, index, moves);
+			break;
+		case PIECE_BISHOP:
+			break;
+		case PIECE_ROOK:
+			break;
+		case PIECE_QUEEN:
+			break;
+		case PIECE_KING:
+			break;
+		default:
+			return false;
+		}
+	}
+
+	return true;
 }

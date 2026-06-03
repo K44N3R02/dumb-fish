@@ -70,11 +70,15 @@
 #define SQ_H1 63
 #define SQ_NONE 64
 
-#define GRID_MAKE(col, row) (col + (8 - row) * 8)
+#define OFFSET_UP (-8)
+#define OFFSET_DOWN 8
+#define OFFSET_LEFT (-1)
+#define OFFSET_RIGHT 1
+
+#define GRID_MAKE(col, row) (((col) - 'a') + (8 - row) * 8)
 
 #define GRID_ROW(square) (8 - (square) / 8)
-#define GRID_COL(square) ((square) % 8)
-#define GRID_COL_LETTER(square) (((square) % 8) + 'a')
+#define GRID_COL(square) (((square) % 8) + 'a')
 
 /**
  * struct board - internal representation of a chess board for searches

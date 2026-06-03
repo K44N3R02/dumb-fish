@@ -16,6 +16,9 @@
 #define PIECE_TYPE_MASK ((uint8_t)0b00000111)
 #define PIECE_COLOR_MASK ((uint8_t)0b00011000)
 
+#define PIECE_TYPE(piece) ((piece) & PIECE_TYPE_MASK)
+#define PIECE_COLOR(piece) ((piece) & PIECE_COLOR_MASK)
+
 #define IS_WHITE_PIECE(piece) (((piece) & PIECE_COLOR_MASK) == PIECE_WHITE)
 #define IS_BLACK_PIECE(piece) (((piece) & PIECE_COLOR_MASK) == PIECE_BLACK)
 
