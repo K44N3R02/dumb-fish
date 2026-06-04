@@ -31,7 +31,6 @@
 	void push_##name##_list(struct name##_list *list, type elem)          \
 	{                                                                     \
 		if (list->size >= list->capacity) {                           \
-			type *tmp = list->array;                              \
 			list->capacity = (list->capacity == 0) ?              \
 						 8 :                          \
 						 list->capacity * 2;          \
@@ -42,7 +41,6 @@
 					"[!] push_##name##_list realloc\n");  \
 				exit(1);                                      \
 			}                                                     \
-			free(tmp);                                            \
 		}                                                             \
                                                                               \
 		list->array[list->size] = elem;                               \
