@@ -271,6 +271,72 @@ static void knight_moves(const struct board *board, uint8_t color,
 }
 
 /**
+ * sliding_moves() - add pseudo-legal sliding moves from a square in a direction
+ * @board: pointer to &struct board whose legal moves will be generated
+ * @color: color of player to move
+ * @square: origin square of sliding moves
+ * @drow: change in row of piece on every step
+ * @dcol: change in column of piece on every step
+ * @moves: list where pseudo-legal moves will be added
+ *
+ * Adds @drow and @dcol offsets to square and until destination is not in
+ * borders of chess board, and adds this move to @moves list. It early exits
+ * before adding a move if it would land on a piece with same color. It early
+ * exits after adding a capture move.
+ *
+ * NOTE: this function does not consider pins/checks etc.
+ *
+ * Side Effect: this function adds new &struct move's to @moves
+ */
+static void sliding_moves(const struct board *board, uint8_t color,
+			  uint8_t square, int8_t drow, int8_t dcol,
+			  struct move_list *moves)
+{
+	int8_t row = GRID_ROW(square);
+	char col = GRID_COL(square);
+
+	row += drow;
+	col += dcol;
+
+	while (1 <= row && row <= 8 && 'a' <= col && col <= 'h') {
+		uint8_t target = GRID_MAKE(col, row);
+		if (PIECE_COLOR(board->grid[target]) == color)
+			break; // can't capture friendly piece
+		struct move move = new_move(square, target, board);
+		push_move_list(moves, move);
+		if (move.prev_captured_piece != PIECE_NONE)
+			break; // captured enemy piece
+		row += drow;
+		col += dcol;
+	}
+}
+
+static void rook_moves(const struct board *board, uint8_t color, uint8_t square,
+		       struct move_list *moves)
+{
+	sliding_moves(board, color, square, 0, +1, moves);
+	sliding_moves(board, color, square, 0, -1, moves);
+	sliding_moves(board, color, square, +1, 0, moves);
+	sliding_moves(board, color, square, -1, 0, moves);
+}
+
+static void bishop_moves(const struct board *board, uint8_t color,
+			 uint8_t square, struct move_list *moves)
+{
+	sliding_moves(board, color, square, +1, +1, moves);
+	sliding_moves(board, color, square, +1, -1, moves);
+	sliding_moves(board, color, square, -1, +1, moves);
+	sliding_moves(board, color, square, -1, -1, moves);
+}
+
+static void queen_moves(const struct board *board, uint8_t color,
+			uint8_t square, struct move_list *moves)
+{
+	rook_moves(board, color, square, moves);
+	bishop_moves(board, color, square, moves);
+}
+
+/**
  * get_legal_moves() - get all possible moves on given board
  * @board: pointer to the &struct board whose legal moves will be generated
  * @moves: pointer to a list of moves to return the legal moves
@@ -297,10 +363,13 @@ bool get_legal_moves(const struct board *board, struct move_list *moves)
 			knight_moves(board, color_to_move, index, moves);
 			break;
 		case PIECE_BISHOP:
+			bishop_moves(board, color_to_move, index, moves);
 			break;
 		case PIECE_ROOK:
+			rook_moves(board, color_to_move, index, moves);
 			break;
 		case PIECE_QUEEN:
+			queen_moves(board, color_to_move, index, moves);
 			break;
 		case PIECE_KING:
 			break;
